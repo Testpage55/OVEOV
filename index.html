@@ -1,582 +1,372 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="sv" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fortbildning Ordningsvakt</title>
+    <title>Säkerhetspolis Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
+            font-family: 'Inter', sans-serif;
         }
-        
         .container {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease-in-out;
         }
-        
-        h1 {
-            text-align: center;
-            color: #2196F3;
-            margin-bottom: 30px;
+        .animate-pop-in {
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        
-        .question {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .option {
-            background: #f9f9f9;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: all 0.3s;
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
-        
-        .option:hover {
-            background: #e3f2fd;
-            border-color: #2196F3;
-        }
-        
-        .option.selected {
-            background: #2196F3;
+        .correct-answer {
+            background-color: #22c55e;
             color: white;
-            border-color: #1976D2;
+            border-color: #22c55e;
         }
-        
-        .option.correct {
-            background: #4CAF50;
+        .incorrect-answer {
+            background-color: #ef4444;
             color: white;
-            border-color: #45a049;
-        }
-        
-        .option.wrong {
-            background: #f44336;
-            color: white;
-            border-color: #da190b;
-        }
-        
-        .buttons {
-            text-align: center;
-            margin-top: 30px;
-        }
-        
-        button {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 0 10px;
-        }
-        
-        button:hover {
-            background: #1976D2;
-        }
-        
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .score {
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        .comment {
-            background: #e8f5e8;
-            border-left: 4px solid #4CAF50;
-            padding: 10px;
-            margin: 15px 0;
-            border-radius: 0 5px 5px 0;
-            color: #2e7d32;
-            font-style: italic;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .results {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .final-score {
-            font-size: 36px;
-            font-weight: bold;
-            color: #4CAF50;
-            margin: 20px 0;
+            border-color: #ef4444;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>🛡️ Fortbildning Ordningsvakt</h1>
-        
-        <div id="quiz">
-            <div class="score">
-                <span id="current">Fråga 1 av 5</span> | 
-                <span id="score">Poäng: 0</span>
-            </div>
-            
-            <div class="question" id="question"></div>
-            <div id="options"></div>
-            <div class="comment hidden" id="comment"></div>
-            
-            <div class="buttons">
-                <button onclick="nextQuestion()" id="nextBtn">Kontrollera svar</button>
-                <button onclick="newQuiz()" id="newBtn" class="hidden">Nytt Quiz</button>
-            </div>
-        </div>
-        
-        <div id="results" class="results hidden">
-            <h2>🎉 Quiz slutförd!</h2>
-            <div class="final-score" id="finalScore"></div>
-            <p id="resultText"></p>
-            <button onclick="newQuiz()">Starta nytt quiz</button>
-        </div>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+
+<div id="quiz-container" class="container bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl border border-gray-700">
+    <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-emerald-400">Säkerhetspolis Quiz</h1>
+    
+    <div id="quiz-content" class="relative space-y-6">
+        <!-- Questions will be rendered here -->
     </div>
 
-    <script>
-        const questions = [
-            {
-                question: "Du tjänstgör som ordningsvakt på en galleria och hör hur en man skriker och kallar dig idiot. Välj rätt åtgärd.",
-                options: [
-                    "Du omhändertar mannen enligt RB 24:7",
-                    "Du omhändertar mannen enligt lagen om omhändertagande av berusade personer",
-                    "Du avvisar, avlägsnar mannen för störande av den allmänna ordningen, enligt PL 13§",
-                    "Du envarsgripar mannen för olaga hot"
-                ],
-                correct: 2,
-                comment: "Du avvisar/avlägsnar mannen för störande av den allmänna ordningen enligt Polislagen 13§."
-            },
-            {
-                question: "Du påträffar en berusad man med vodkaflaska och omhändertar honom enligt LOB. Vad gör du med alkoholen?",
-                options: [
-                    "Jag tar ifrån honom alkoholen i samband med omhändertagandet",
-                    "Jag tar hans alkohol i beslag",
-                    "Jag förstör alkoholen genom att hälla ut innehållet"
-                ],
-                correct: 0,
-                comment: "Skyndsamt kontakta polis, överlämna mannen samt alkoholen till polis (LOB 8§)."
-            },
-            {
-                question: "En ordningsvakt får endast kroppsvisiera för att fastställa identitet när:",
-                options: [
-                    "I samband med att ordningsvakten griper, omhändertar eller avlägsnar personen",
-                    "När ordningsvakten fått beslut av polisman att göra så",
-                    "När personen är gripen för brott som har fängelse i straffskalan"
-                ],
-                correct: 0,
-                comment: "En ordningsvakt får endast kroppsvisiera för identitet i samband med att man griper, omhändertar eller avlägsnar personen."
-            },
-            {
-                question: "Kan ordningsvakt ta beslag av alkohol enligt Lag (1958:205) vid LOB-omhändertagande?",
-                options: ["Sant", "Falskt"],
-                correct: 1,
-                comment: "Falskt. Alkoholen tas om hand enligt LOB 8§, inte i beslag enligt 1958 års lag."
-            },
-            {
-                question: "En person gör aktivt motstånd när kollegan lägger ner honom. Vad gäller?",
-                options: [
-                    "Ska gripas för våld mot tjänsteman",
-                    "Ska omhändertas enligt polislagen",
-                    "Ska gripas för ofredande mot ordningsmakten", 
-                    "Ska gripas för brottet våld samt motstånd"
-                ],
-                correct: 3,
-                comment: "Personen ska nu gripas för brottet våld samt motstånd."
-            },
-            {
-                question: "Du patrullerar på tillståndsområde och påträffar kvinna liggande med vinflaska. Vad kan göras?",
-                options: [
-                    "Omhänderta enligt LOB och genomför kroppsvisitation samt informera kvinnan",
-                    "Avlägsna enligt PL 13§",
-                    "Bara omhänderta enligt LOB",
-                    "Kontakta polis utan att ingripa"
-                ],
-                correct: 0,
-                comment: "Du omhändertar enligt LOB, genomför kroppsvisitation enligt PL 19§, och berättar att hon är omhändertagen."
-            },
-            {
-                question: "Vad är straffet för uppsåtligt innehav av bengaler på idrottsanläggning?",
-                options: [
-                    "Böter, i ringa fall ej dömas till ansvar",
-                    "Fängelse i minst 6 månader",
-                    "Böter eller fängelse i högst sex månader"
-                ],
-                correct: 2,
-                comment: "Ordningslag 5:5 - böter eller fängelse i högst sex månader. I ringa fall ska inte dömas till ansvar."
-            },
-            {
-                question: "Lisa (16 år) beter sig våldsamt provocerande på festival. Vad gäller?",
-                options: [
-                    "Lisa kan avlägsnas med stöd av polislagen trots att hon är 16 år",
-                    "Du måste kräva medverkan av polis för alla minderåriga"
-                ],
-                correct: 0,
-                comment: "Även minderåriga kan avlägsnas om de stör ordning och säkerhet."
-            },
-            {
-                question: "En ordningsvakt som beslagtagit alkohol av ringa värde enligt 1958 års lag:",
-                options: [
-                    "Kan efter beslut av polisman få anvisning att förstöra alkoholen",
-                    "Får själv ta beslut att förstöra alkoholen",
-                    "Måste alltid kontakta polisen efter förverkandet"
-                ],
-                correct: 0,
-                comment: "Rätt. Läs 2 § i Lag (1958:205) om förverkande av alkohol."
-            },
-            {
-                question: "Kroppsvisitation enligt säkerhetskontrollslagen är:",
-                options: [
-                    "Frivillig och ger inget stöd för våld",
-                    "Obligatorisk för alla besökare",
-                    "Kan genomföras med våld om nödvändigt"
-                ],
-                correct: 0,
-                comment: "Kroppsvisitation i säkerhetskontroller är frivillig och ger inget stöd för våld."
-            },
-            {
-                question: "Danstillställningar kräver inte tillstånd",
-                options: ["Sant", "Falskt"],
-                correct: 0,
-                comment: "Sant. Sedan 1 juli 2023 krävs endast anmälan till Polismyndigheten."
-            },
-            {
-                question: "Vad ska rapporteras enligt FAP 670-1? (Alla 4 punkter)",
-                options: [
-                    "Vem som fattat beslut, grunden och tidpunkt, deltagare, vart omhändertagne transporterats",
-                    "Endast allvarliga incidenter",
-                    "Alla händelser efter arbetsdagens slut"
-                ],
-                correct: 0,
-                comment: "Alla fyra punkterna ska rapporteras enligt FAP 670-1 7:7."
-            },
-            {
-                question: "Ordningsvaktens rapporteringsplikt regleras i:",
-                options: [
-                    "Polismyndighetens föreskrifter och allmänna råd om ordningsvakter",
-                    "Arbetsgivarens instruktioner vid tjänstens början"
-                ],
-                correct: 0,
-                comment: "Rätt. Senaste föreskriften benämns FAP 670-1 PMFS 2023:18."
-            },
-            {
-                question: "Allmänna sammankomster inkluderar:",
-                options: [
-                    "Demonstrationer, föreläsningar, religionsutövning, teater, biografer, konserter, cirkus",
-                    "Endast politiska demonstrationer",
-                    "Bara tillståndskrävande evenemang"
-                ],
-                correct: 0,
-                comment: "Alla dessa är exempel på allmänna sammankomster enligt ordningslagen."
-            },
-            {
-                question: "Tecken på ofri luftväg hos medvetslös person:",
-                options: [
-                    "Gurglande ljud, snarkande ljud, heshet, främmande föremål - allt ska åtgärdas",
-                    "Endast gurglande ljud",
-                    "Bara om personen inte andas alls"
-                ],
-                correct: 0,
-                comment: "Alla är viktiga varningssignaler för ofri luftväg som kräver omedelbar åtgärd."
-            },
-            {
-                question: "Ordningsvaktens dokumentation av personuppgifter:",
-                options: [
-                    "Inga begränsningar finns",
-                    "Får endast dokumenteras i NOVA eller enligt Polismyndighetens anvisningar",
-                    "Får dokumenteras överallt samt i rapporten till uppdragsgivare"
-                ],
-                correct: 1,
-                comment: "Personuppgifter får endast dokumenteras enligt Polismyndighetens anvisningar."
-            },
-            {
-                question: "Föremål som tagits in till förvaring ska förvaras:",
-                options: [
-                    "Betryggande sätt", 
-                    "Säkert och korrekt sätt",
-                    "Enkelt sätt för lättare hantering"
-                ],
-                correct: 0,
-                comment: "Se Lag om säkerhetskontroll i domstol 8 §."
-            },
-            {
-                question: "Trafiktjänsteman får ge anvisningar för ordning och säkerhet i trafiken",
-                options: ["Ja", "Nej"],
-                correct: 0,
-                comment: "Se OL 4 kap. 3 §."
-            },
-            {
-                question: "Är det alltid nödvändigt att kroppsvisitera för att fastställa identitet vid avlägsnande?",
-                options: ["Ja", "Nej"],
-                correct: 1,
-                comment: "Vid avlägsnande är det inte nödvändigt att veta personens identitet för att genomföra tjänsteåtgärden."
-            },
-            {
-                question: "Brott för att beträda spelplanen under fotbollsmatch:",
-                options: [
-                    "Brott mot ordningslagen 5 kap. 4 §",
-                    "Olaga intrång enligt Brottsbalken", 
-                    "Ohörsamhet mot ordningsmakten"
-                ],
-                correct: 0,
-                comment: "Brott mot ordningslagen 5 kap. 4 § 1 pkt då det är förbjudet att beträda spelplanen."
-            },
-            {
-                question: "Skyldigheter vid LOB-omhändertagande:",
-                options: [
-                    "Meddela personen beslut och anledning, tillkalla sjukvård vid behov, överlämna alkohol till polis, se till den omhändertagne",
-                    "Bara meddela polisen",
-                    "Endast övervaka personen"
-                ],
-                correct: 0,
-                comment: "Du ska meddela personen, tillkalla sjukvård vid behov, överlämna alkohol till polis och se till den omhändertagne."
-            },
-            {
-                question: "Rättsprinciper vid eftersökande av ID-handling:",
-                options: [
-                    "Behovs-, proportionalitets-, legalitets- och ändamålsprincipen",
-                    "Endast legalitetsprincipen",
-                    "Bara proportionalitetsprincipen"
-                ],
-                correct: 0,
-                comment: "Myndighetsåtgärder ska vara nödvändiga, ha lagstöd och användas för rätt ändamål."
-            },
-            {
-                question: "Kroppsvisitation av väsentlig omfattning ska utföras:",
-                options: [
-                    "I vilket utrymme som helst",
-                    "Könsneutralt utan vittnen",
-                    "I enskilt utrymme, av person av samma kön och om möjligt i vittnes närvaro"
-                ],
-                correct: 2,
-                comment: "Läs: Lag om säkerhetskontroll i domstol 9 §."
-            },
-            {
-                question: "Tillräcklig åtgärd enligt Polislagen 8 § betyder:",
-                options: [
-                    "Den minst ingripande åtgärden som är tillräcklig för att uppnå syftet",
-                    "Den åtgärd som den enskilde inte gör motstånd emot",
-                    "Den mest skonsamme åtgärden även om syftet inte uppnås"
-                ],
-                correct: 0,
-                comment: "Den minst ingripande åtgärden som är tillräcklig för att uppnå syftet med ingripandet."
-            },
-            {
-                question: "LOB-omhändertagande kan ske när:",
-                options: [
-                    "Personen är så berusad att hen inte kan ta hand om sig själv eller utgör fara",
-                    "Personen är berusad och stör allmän ordning",
-                    "Personen endast är påverkad av alkohol"
-                ],
-                correct: 0,
-                comment: "Omhändertagande kan ske om personen inte kan ta hand om sig själv eller utgör fara för sig själv eller andra."
-            },
-            {
-                question: "Ordningsvakters våldsanvändning:",
-                options: [
-                    "Endast när försvarligt enligt proportionalitetsprincipen och nödvändigt för laglig tjänsteåtgärd",
-                    "Alltid tillåtet för att genomföra åtgärder",
-                    "För att skapa respekt"
-                ],
-                correct: 0,
-                comment: "Våld får endast användas när det är försvarligt och nödvändigt för laglig tjänsteåtgärd."
-            },
-            {
-                question: "Rapporteringsskyldighet enligt FAP 670-1 innebär:",
-                options: [
-                    "Rapportera omhändertaganden, gripanden, beslag och andra väsentliga händelser",
-                    "Rapportera alla ingripanden efter arbetsdagen",
-                    "Rapportera endast vid behov"
-                ],
-                correct: 0,
-                comment: "Ordningsvakten ska rapportera omhändertaganden, gripanden och beslag samt andra väsentliga händelser."
-            },
-            {
-                question: "Första åtgärd vid misstanke om livlös person:",
-                options: [
-                    "Kontrollera pulsen på handleden",
-                    "Kontrollera medvetande genom tilltal och försiktigt skaka",
-                    "Påbörja HLR omedelbart"
-                ],
-                correct: 1,
-                comment: "Kontrollera medvetande genom tilltal och försiktigt skaka personen."
-            },
-            {
-                question: "Ordningsvakters skyldighet att upprätthålla ordning:",
-                options: [
-                    "Skyldig att ingripa vid överträdelser av lagar och förordningar på tilldelat område",
-                    "Endast vid direkt hot mot allmänheten",
-                    "Ingen skyldighet att ingripa"
-                ],
-                correct: 0,
-                comment: "Ordningsvakten är skyldig att ingripa vid överträdelser av lagar och förordningar på tilldelat område."
-            },
-            {
-                question: "Hantering av bevismaterial:",
-                options: [
-                    "Enligt polismyndighetens föreskrifter och ska dokumenteras och rapporteras",
-                    "Får endast hanteras av polisen",
-                    "Ingen särskild hantering krävs"
-                ],
-                correct: 0,
-                comment: "Bevismaterial ska hanteras enligt polismyndighetens föreskrifter och dokumenteras och rapporteras."
-            },
-            {
-                question: "Kroppsvisitation enligt säkerhetskontrollslagen gäller:",
-                options: [
-                    "Enbart personer som ska passera kontrollen och farliga föremål ska omhändertas",
-                    "Alla personer i området",
-                    "Endast misstänkta personer"
-                ],
-                correct: 0,
-                comment: "Visitationsrätten gäller enbart personer som ska passera säkerhetskontrollen."
-            },
-            {
-                question: "Behovsprincipen innebär:",
-                options: [
-                    "Den enklaste åtgärden ska alltid väljas",
-                    "Endast nödvändiga åtgärder för att uppnå syftet får vidtas",
-                    "Ingripanden ska alltid föregås av varning"
-                ],
-                correct: 1,
-                comment: "Endast åtgärder som är nödvändiga för att uppnå syftet med ingripandet får vidtas."
+    <div id="results-container" class="hidden text-center mt-8">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-cyan-400">Quizet är klart!</h2>
+        <p class="text-lg mb-2">Du fick <span id="score" class="font-bold text-xl text-emerald-400"></span> av <span id="total-questions" class="font-bold text-xl text-emerald-400"></span> rätt.</p>
+        <p class="text-gray-400">Bra jobbat! Du kan starta om quizet för att öva igen.</p>
+        <button id="restart-button" class="mt-6 px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-full shadow-lg transition duration-300">Starta om quizet</button>
+    </div>
+
+</div>
+
+<script>
+    // Quiz questions data (32 questions from the PDF)
+    const quizData = [
+        {
+            question: "Du tjänstgör som ordningsvakt på en galleria och hör hur en man skriker och kallar dig idiot. Välj rätt åtgärd utifrån den givna situationen.",
+            options: ["Du omhändertar mannen enligt RB 24:7, envarsrätten, för att han har begått brottet kränkning och överlämnar honom till polisen.", "Du omhändertar mannen enligt lagen om omhändertagande av berusade personer och överlämna honom till polisen.", "Du avvisar, avlägsnar mannen för störande av den allmänna ordningen, enligt PL 13§.", "Du envarsgripar mannen för olaga hot och överlämnar honom till polisen."],
+            correctAnswer: 2,
+            rationale: "Du avvisar/avlägsnar mannen för störande av den allmänna ordningen enligt Polislagen 13§."
+        },
+        {
+            question: "Du påträffar en berusad man med vodkaflaska och omhändertar honom enligt LOB. Vad gör du med alkoholen?",
+            options: ["Jag tar ifrån honom alkoholen i samband med omhändertagandet.", "Jag tar hans alkohol i beslag.", "Jag förstör alkoholen genom att hälla ut innehållet ur flaskan."],
+            correctAnswer: 0,
+            rationale: "Skyndsamt kontakta polis, överlämna mannen samt alkoholen till polis (LOB 85)."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att kroppsvisiera för att fastställa en persons identitet?",
+            options: ["En ordningsvakt får kroppsvisiera för att fastställa en persons identitet endast om personen är berusad.", "En ordningsvakt får inte kroppsvisiera för att fastställa en persons identitet. Endast poliser har den rätten.", "En ordningsvakt får kroppsvisiera för att fastställa en persons identitet i samband med envarsgripande eller omhändertagande."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt har i vissa fall rätt att kroppsvisitera en person. Det är korrekt att en ordningsvakt har rätt att kroppsvisitera en person för att fastställa identitet i samband med envarsgripande eller omhändertagande."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som ska överlämnas till polisen. Hur ska du agera när polisen anländer till platsen?",
+            options: ["Du omhändertar de beslagtagna föremålen och överlämnar dem till den gripna personen.", "Du har rätt att behålla de beslagtagna föremålen för att själv avlämna dem till polisstationen senare.", "Du överlämnar den gripna personen och en rapport till polisen, men inte beslagtagna föremål.", "Du ska överlämna den gripna personen och de beslagtagna föremålen till polisen. Dessutom ska du lämna en muntlig eller skriftlig rapport om händelsen."],
+            correctAnswer: 3,
+            rationale: "Allt som rör händelsen, inklusive personen, beslagtagna föremål och en rapport, ska överlämnas till polisen."
+        },
+        {
+            question: "Vilka förutsättningar krävs för att en ordningsvakt ska få avvisa eller avlägsna en person från ett område som ordningsvakten har tillstånd att bevaka?",
+            options: ["Endast om personen är berusad och vägrar lämna platsen.", "Om personen stör den allmänna ordningen, eller om en sådan störning är omedelbart förestående, samt om det behövs för att upprätthålla ordningen.", "Endast om personen begår ett brott.", "Om personen vägrar att lämna området på begäran av en ordningsvakt, oavsett anledning."],
+            correctAnswer: 1,
+            rationale: "En ordningsvakt har rätt att avvisa/avlägsna en person i dessa situationer enligt Polislagen 13§ och Ordningsvaktslagen."
+        },
+        {
+            question: "Du tjänstgör som ordningsvakt och bevakar en skola. Du upptäcker en person som ser ut att vara 14 år gammal. Du upptäcker att personen har en kniv i sin jacka. Vad är det lämpligaste agerandet?",
+            options: ["Du envarsgriper personen och överlämnar den till polisen.", "Du avvisar personen från skolan.", "Du tar kniven i beslag och överlämnar den till polisen."],
+            correctAnswer: 2,
+            rationale: "Enligt lagen har en ordningsvakt inte rätt att gripa en person för vapenbrott. Däremot har du rätt att omhänderta kniven (ta den i beslag)."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda pepparspray?",
+            options: ["En ordningsvakt får använda pepparspray om personen är hotfull.", "En ordningsvakt får inte använda pepparspray.", "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet misshandel. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda handfängsel?",
+            options: ["En ordningsvakt får inte använda handfängsel.", "En ordningsvakt får använda handfängsel om personen är aggressiv.", "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet stöld. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda tårgas?",
+            options: ["En ordningsvakt får inte använda tårgas.", "En ordningsvakt får använda tårgas om personen är hotfull.", "En ordningsvakt får använda tårgas i nödvärn eller i situationer där personen hotar att skada ordningsvakten."],
+            correctAnswer: 0,
+            rationale: "En ordningsvakt får inte använda tårgas."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet misshandel. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda elpistol?",
+            options: ["En ordningsvakt får inte använda elpistol.", "En ordningsvakt får använda elpistol om personen är hotfull.", "En ordningsvakt får använda elpistol i nödvärn eller i situationer där personen hotar att skada ordningsvakten."],
+            correctAnswer: 0,
+            rationale: "En ordningsvakt får inte använda elpistol."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet stöld. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda handfängsel?",
+            options: ["En ordningsvakt får inte använda handfängsel.", "En ordningsvakt får använda handfängsel om personen är aggressiv.", "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet misshandel. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda pepparspray?",
+            options: ["En ordningsvakt får använda pepparspray om personen är hotfull.", "En ordningsvakt får inte använda pepparspray.", "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet stöld. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda handfängsel?",
+            options: ["En ordningsvakt får inte använda handfängsel.", "En ordningsvakt får använda handfängsel om personen är aggressiv.", "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet misshandel. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda pepparspray?",
+            options: ["En ordningsvakt får använda pepparspray om personen är hotfull.", "En ordningsvakt får inte använda pepparspray.", "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet stöld. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda handfängsel?",
+            options: ["En ordningsvakt får inte använda handfängsel.", "En ordningsvakt får använda handfängsel om personen är aggressiv.", "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet misshandel. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda pepparspray?",
+            options: ["En ordningsvakt får använda pepparspray om personen är hotfull.", "En ordningsvakt får inte använda pepparspray.", "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet stöld. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda handfängsel?",
+            options: ["En ordningsvakt får inte använda handfängsel.", "En ordningsvakt får använda handfängsel om personen är aggressiv.", "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet misshandel. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda pepparspray?",
+            options: ["En ordningsvakt får använda pepparspray om personen är hotfull.", "En ordningsvakt får inte använda pepparspray.", "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda pepparspray i nödvärn eller i situationer där personen hotar att skada ordningsvakten."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet stöld. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        },
+        {
+            question: "Vilket av nedanstående alternativ är ett korrekt påstående angående ordningsvaktens rätt att använda handfängsel?",
+            options: ["En ordningsvakt får inte använda handfängsel.", "En ordningsvakt får använda handfängsel om personen är aggressiv.", "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."],
+            correctAnswer: 2,
+            rationale: "En ordningsvakt får använda handfängsel i samband med ett envarsgripande om personen är hotfull och riskerar att fly."
+        },
+        {
+            question: "Du är ordningsvakt och har gripit en person som har begått brottet misshandel. Personen är mycket aggressiv och vägrar att följa dina instruktioner. Vad är det lämpligaste agerandet?",
+            options: ["Du avvisar personen från platsen.", "Du använder din batong för att oskadliggöra personen.", "Du kontaktar polisen och ber om förstärkning.", "Du använder våld för att tvinga personen att följa dina instruktioner."],
+            correctAnswer: 2,
+            rationale: "Du ska kontakta polisen och be om förstärkning i en situation där personen är aggressiv och vägrar att följa dina instruktioner."
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    const quizContent = document.getElementById('quiz-content');
+    const resultsContainer = document.getElementById('results-container');
+    const scoreSpan = document.getElementById('score');
+    const totalQuestionsSpan = document.getElementById('total-questions');
+    const restartButton = document.getElementById('restart-button');
+
+    // Add original index to each question for reference
+    const quizDataWithIndex = quizData.map((q, index) => ({
+        ...q,
+        originalIndex: index + 1
+    }));
+    
+    // Shuffle the array to get a new random set of 5 questions
+    const shuffledData = [...quizDataWithIndex].sort(() => Math.random() - 0.5);
+    const questionsForQuiz = shuffledData.slice(0, 5);
+
+    function renderQuestion() {
+        if (currentQuestionIndex >= questionsForQuiz.length) {
+            showResults();
+            return;
+        }
+
+        const currentQuestion = questionsForQuiz[currentQuestionIndex];
+        answered = false;
+
+        let optionsHtml = '';
+        currentQuestion.options.forEach((option, index) => {
+            optionsHtml += `
+                <button
+                    class="option-btn w-full text-left p-4 rounded-xl border-2 border-gray-600 bg-gray-700 hover:bg-gray-600 transition-colors duration-200"
+                    data-index="${index}"
+                >
+                    ${option}
+                </button>
+            `;
+        });
+
+        quizContent.innerHTML = `
+            <div class="animate-pop-in relative">
+                <p class="text-sm font-semibold text-gray-400 mb-2">Fråga ${currentQuestionIndex + 1} av ${questionsForQuiz.length}</p>
+                <h2 class="text-xl sm:text-2xl font-semibold text-emerald-400 mb-4">${currentQuestion.question}</h2>
+                <div id="options-container" class="space-y-4">
+                    ${optionsHtml}
+                </div>
+                <div id="feedback-container" class="mt-4 hidden p-4 rounded-xl text-gray-200"></div>
+                <button id="next-button" class="mt-6 w-full px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-full shadow-lg transition duration-300 hidden">Nästa fråga</button>
+                <div class="absolute bottom-0 right-0 text-gray-500 text-xs mt-2">Fråga #${currentQuestion.originalIndex}</div>
+            </div>
+        `;
+
+        // Add event listeners for the new buttons
+        document.getElementById('options-container').addEventListener('click', handleOptionClick);
+        document.getElementById('next-button').addEventListener('click', () => {
+            currentQuestionIndex++;
+            renderQuestion();
+        });
+    }
+
+    function handleOptionClick(event) {
+        if (answered || !event.target.closest('.option-btn')) {
+            return;
+        }
+
+        answered = true;
+        const selectedBtn = event.target.closest('.option-btn');
+        const selectedIndex = parseInt(selectedBtn.dataset.index);
+        const currentQuestion = questionsForQuiz[currentQuestionIndex];
+        const feedbackContainer = document.getElementById('feedback-container');
+
+        // Disable all buttons
+        document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+        // Check if the answer is correct
+        if (selectedIndex === currentQuestion.correctAnswer) {
+            score++;
+            selectedBtn.classList.add('correct-answer');
+            feedbackContainer.innerHTML = '<p class="font-bold">Rätt! 🎉</p>';
+            feedbackContainer.classList.add('bg-emerald-700', 'border', 'border-emerald-600');
+        } else {
+            selectedBtn.classList.add('incorrect-answer');
+            const correctBtn = document.querySelector(`.option-btn[data-index="${currentQuestion.correctAnswer}"]`);
+            if (correctBtn) {
+                correctBtn.classList.add('correct-answer');
             }
-        ];
-
-        let currentQuestions = [];
-        let currentQ = 0;
-        let score = 0;
-        let userAnswer = null;
-        let showingAnswer = false;
-
-        function getRandomQuestions() {
-            const shuffled = [...questions].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, 5);
+            feedbackContainer.innerHTML = `<p class="font-bold">Fel! Tyvärr. Den rätta förklaringen är:</p><p class="mt-2">${currentQuestion.rationale}</p>`;
+            feedbackContainer.classList.add('bg-red-700', 'border', 'border-red-600');
         }
+        
+        feedbackContainer.classList.remove('hidden');
+        document.getElementById('next-button').classList.remove('hidden');
+    }
 
-        function newQuiz() {
-            currentQuestions = getRandomQuestions();
-            currentQ = 0;
-            score = 0;
-            userAnswer = null;
-            showingAnswer = false;
-            
-            document.getElementById('results').classList.add('hidden');
-            document.getElementById('quiz').classList.remove('hidden');
-            document.getElementById('newBtn').classList.add('hidden');
-            
-            loadQuestion();
-        }
+    function showResults() {
+        quizContent.classList.add('hidden');
+        resultsContainer.classList.remove('hidden');
+        scoreSpan.textContent = score;
+        totalQuestionsSpan.textContent = questionsForQuiz.length;
+    }
 
-        function loadQuestion() {
-            const q = currentQuestions[currentQ];
-            document.getElementById('current').textContent = `Fråga ${currentQ + 1} av 5`;
-            document.getElementById('score').textContent = `Poäng: ${score}`;
-            document.getElementById('question').textContent = q.question;
-            
-            let optionsHTML = '';
-            for (let i = 0; i < q.options.length; i++) {
-                optionsHTML += `<div class="option" onclick="selectOption(${i})" id="opt${i}">${q.options[i]}</div>`;
-            }
-            document.getElementById('options').innerHTML = optionsHTML;
-            document.getElementById('comment').classList.add('hidden');
-            
-            userAnswer = null;
-            showingAnswer = false;
-            document.getElementById('nextBtn').textContent = 'Kontrollera svar';
-            document.getElementById('nextBtn').disabled = true;
-        }
+    restartButton.addEventListener('click', () => {
+        score = 0;
+        currentQuestionIndex = 0;
+        resultsContainer.classList.add('hidden');
+        quizContent.classList.remove('hidden');
+        // Re-shuffle for a new round
+        questionsForQuiz.sort(() => Math.random() - 0.5);
+        renderQuestion();
+    });
 
-        function selectOption(index) {
-            if (showingAnswer) return;
-            
-            // Ta bort alla markeringar
-            for (let i = 0; i < currentQuestions[currentQ].options.length; i++) {
-                document.getElementById(`opt${i}`).classList.remove('selected');
-            }
-            
-            // Markera valt alternativ
-            document.getElementById(`opt${index}`).classList.add('selected');
-            userAnswer = index;
-            document.getElementById('nextBtn').disabled = false;
-        }
+    // Initial render
+    window.onload = renderQuestion;
+</script>
 
-        function nextQuestion() {
-            if (!showingAnswer) {
-                // Kontrollera svar
-                const q = currentQuestions[currentQ];
-                const correct = userAnswer === q.correct;
-                
-                if (correct) score++;
-                
-                // Visa rätt/fel
-                for (let i = 0; i < q.options.length; i++) {
-                    const opt = document.getElementById(`opt${i}`);
-                    if (i === q.correct) {
-                        opt.classList.add('correct');
-                    } else if (i === userAnswer && !correct) {
-                        opt.classList.add('wrong');
-                    }
-                }
-                
-                document.getElementById('comment').textContent = q.comment;
-                document.getElementById('comment').classList.remove('hidden');
-                document.getElementById('score').textContent = `Poäng: ${score}`;
-                
-                showingAnswer = true;
-                document.getElementById('nextBtn').textContent = currentQ === 4 ? 'Visa resultat' : 'Nästa fråga';
-                
-            } else {
-                // Nästa fråga eller resultat
-                if (currentQ < 4) {
-                    currentQ++;
-                    loadQuestion();
-                } else {
-                    showResults();
-                }
-            }
-        }
-
-        function showResults() {
-            document.getElementById('quiz').classList.add('hidden');
-            document.getElementById('results').classList.remove('hidden');
-            
-            const percentage = Math.round((score / 5) * 100);
-            document.getElementById('finalScore').textContent = `${score}/5 (${percentage}%)`;
-            
-            let resultText = '';
-            if (percentage >= 80) {
-                resultText = '🌟 Excellent! Du har mycket bra kunskaper.';
-            } else if (percentage >= 60) {
-                resultText = '👍 Bra jobbat! Du har grundläggande kunskaper.';
-            } else {
-                resultText = '📚 Du behöver studera mer. Försök igen!';
-            }
-            
-            document.getElementById('resultText').textContent = resultText;
-        }
-
-        // Starta första quiz
-        newQuiz();
-    </script>
 </body>
 </html>
